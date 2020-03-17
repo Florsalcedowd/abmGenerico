@@ -45,4 +45,5 @@ export class TableComponent implements OnInit {
     this.personaActual = persona;
   }
 
+
 }

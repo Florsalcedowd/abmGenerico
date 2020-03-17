@@ -1,4 +1,4 @@
-import { Component, OnInit, Host, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Host, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { TableComponent } from '../table/table.component';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { Persona } from 'src/app/models/persona';
@@ -11,35 +11,34 @@ import { PersonaService } from 'src/app/services/persona.service';
 })
 export class FormComponent implements OnInit {
 
-  constructor(private personaService: PersonaService, @Host() private tabla: TableComponent, private formBuilder: FormBuilder) { }
+  public formPersona: FormGroup;
+  public personaOriginal: Persona;
+  public edit = false;
+  public isError = false;
 
-  @Input() set personaActual(valor) {
+  @Input() set personaEditar(valor) {
     this.onBuild();
     if (valor) {
-      this.personaOrignal = valor;
-      this.formPersona.patchValue({
+      this.personaOriginal = valor;
+      this.formPersona.setValue({
         id: valor.id,
         nombre: valor.nombre,
         apellido: valor.apellido,
         dni: valor.dni
       });
-      if (valor.id !== 0) {
-        this.edit = true;
-      } else {
-        this.edit = false;
-      }
+      this.edit = valor.id !== 0 ? true : false;
     }
   }
 
   @ViewChild('btnClose', {static: true}) btnClose: ElementRef;
 
-  public formPersona: FormGroup;
-  public personaOrignal: any;
-  public edit = false;
-  public isError = false;
+  constructor(private personaService: PersonaService,
+              @Host() private tabla: TableComponent,
+              private formBuilder: FormBuilder) { }
 
   ngOnInit() {
     this.onBuild();
+    this.edit = false;
   }
 
   onBuild() {
@@ -80,9 +79,13 @@ export class FormComponent implements OnInit {
     this.personaService.put(persona.id, persona).subscribe(
       res => {
         alert('Persona fue actualizada con éxito');
-        const cambio = this.tabla.personas.filter( item => item.id !== persona.id);
-        this.tabla.personas = cambio;
-        this.tabla.personas.unshift(persona);
+        console.log(this.personaOriginal);
+        this.tabla.personas.filter( item => {
+          if (item.id === persona.id) {
+            const idexOfPersona = this.tabla.personas.indexOf(item);
+            this.tabla.personas[idexOfPersona] = res;
+          }
+        });
       },
       err => {
         alert('Ocurrió un error al actualizar persona');
@@ -91,13 +94,14 @@ export class FormComponent implements OnInit {
   }
 
   onClose() {
-    this.personaActual = {
+    this.tabla.personaActual = {
       id: 0,
       nombre: '',
       apellido: '',
       dni: null
     };
     this.isError = false;
+    this.edit = false;
   }
 
   onCloseAlert() {
