@@ -22,12 +22,14 @@ export class TableComponent implements OnInit {
     this.getAllPersonas();
   }
 
+  /* Método que trae el conjunto de personas de la base de datos */
   getAllPersonas() {
     this.personaService.getAll().subscribe( res => {
       this.personas = res;
     });
   }
 
+  /* Método que subscribe al métodos delete del servicio y elimina un registro */
   delete(persona: Persona) {
     const opcion = confirm('¿Desea eliminar este registro?');
     if (opcion === true) {
@@ -41,6 +43,7 @@ export class TableComponent implements OnInit {
     }
   }
 
+  /* Método que actualiza la persona actual al momento de actualizar */
   onPreUpdate(persona: Persona) {
     this.personaActual = persona;
   }

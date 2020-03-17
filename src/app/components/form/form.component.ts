@@ -16,6 +16,7 @@ export class FormComponent implements OnInit {
   public edit = false;
   public isError = false;
 
+  /*  */
   @Input() set personaEditar(valor) {
     this.onBuild();
     if (valor) {
@@ -30,6 +31,7 @@ export class FormComponent implements OnInit {
     }
   }
 
+  /* Elemento que permite cerrar el modal de forma nativa */
   @ViewChild('btnClose', {static: true}) btnClose: ElementRef;
 
   constructor(private personaService: PersonaService,
@@ -38,9 +40,9 @@ export class FormComponent implements OnInit {
 
   ngOnInit() {
     this.onBuild();
-    this.edit = false;
   }
 
+  /* Método que construye nuestro formulario */
   onBuild() {
     this.formPersona = this.formBuilder.group({
       id: new FormControl(0),
@@ -50,6 +52,7 @@ export class FormComponent implements OnInit {
     });
   }
 
+  /* Al darle click a guardar en el formulario */
   onSave(formPersona: FormGroup): void {
     if (formPersona.invalid) {
       this.isError = true;
@@ -58,12 +61,14 @@ export class FormComponent implements OnInit {
         // Agregar
         this.add(formPersona.value);
       } else {
+        // Actualizar
         this.update(formPersona.value);
       }
       this.btnClose.nativeElement.click();
     }
   }
 
+  /* Método que suscribe al método post del servicio y realiza la agregación de una persona */
   add(persona: Persona) {
     this.personaService.post(persona).subscribe(
       res => {
@@ -75,15 +80,15 @@ export class FormComponent implements OnInit {
     );
   }
 
+  /* Método que suscribe al método put del servicio y realiza la actualización de una persona */
   update(persona: Persona) {
     this.personaService.put(persona.id, persona).subscribe(
       res => {
         alert('Persona fue actualizada con éxito');
-        console.log(this.personaOriginal);
         this.tabla.personas.filter( item => {
           if (item.id === persona.id) {
             const idexOfPersona = this.tabla.personas.indexOf(item);
-            this.tabla.personas[idexOfPersona] = res;
+            this.tabla.personas.splice(idexOfPersona, 1, res);
           }
         });
       },
@@ -93,6 +98,7 @@ export class FormComponent implements OnInit {
     );
   }
 
+  /* Al cerrar ventana modal */
   onClose() {
     this.tabla.personaActual = {
       id: 0,
@@ -104,6 +110,7 @@ export class FormComponent implements OnInit {
     this.edit = false;
   }
 
+  /* Al cerrar alerta del formulario */
   onCloseAlert() {
     this.isError = false;
   }
